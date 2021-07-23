@@ -1,15 +1,24 @@
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 #define PROMPT "boomsh >> "
-#define EXIT_SUCCESS 0;
-#define EXIT_ERROR 1;
 #define MAX_ARGS 8;
 
-extern pid_t waitpid();
+// function to read input string line
+char * readline(){
+    char *line;
+    size_t buff_size = 0;
+
+    buff_size = getline(&line, &buff_size, stdin);
+
+    if (buff_size >= 0)
+        return line;
+    else
+        exit(EXIT_FAILURE);
+}
 
 // Function to parse and tokenize command arguments
 char ** parse_input(char * input_string){
@@ -40,7 +49,6 @@ char ** parse_input(char * input_string){
 
 int main(){
     // Initialize Shell
-    char * prompt = PROMPT;
     char * input;
     char ** command;
     pid_t child_pid;
@@ -50,7 +58,8 @@ int main(){
     // TODO: History file?
     while(1){
         // TODO: Do this without this readline ?
-        input = readline(prompt);
+        printf(PROMPT);
+        input = readline();
         command = parse_input(input);
 
         // Execute the command through child process
