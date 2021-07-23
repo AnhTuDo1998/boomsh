@@ -31,6 +31,11 @@ char ** parse_input(char * input_string){
     char * token;
     int index = 0;
 
+    if (!command){
+        fprintf(stderr, "\n\n[ERROR] Memory allocation failed!\n\n");
+        exit(EXIT_FAILURE);
+    }
+
     //Parsing token
     token = strtok(input_string, separator);
     while(token!=NULL){
@@ -44,7 +49,7 @@ char ** parse_input(char * input_string){
             max_num_args += MAX_ARGS;
             command = realloc(command, max_num_args * sizeof(char *));
             if (!command){
-                fprintf(stderr, "\n\n[ERROR] Reallocation failed!\n\n");
+                fprintf(stderr, "\n\n[ERROR] Memory allocation failed!\n\n");
                 exit(EXIT_FAILURE);
             }
         }
