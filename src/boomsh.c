@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 
 #define PROMPT "boomsh >> "
+#define TOKEN_SEPERATOR " \t\r\n"
 #define MAX_ARGS 8;
 
 // function to read input string line
@@ -26,7 +27,7 @@ char ** parse_input(char * input_string){
     // 8 is a fixed, max size of arguments
     int max_num_args = MAX_ARGS;
     char ** command = malloc(max_num_args * sizeof(char *));
-    char * separator = " ";
+    char * separator = TOKEN_SEPERATOR;
     char * token;
     int index = 0;
 
@@ -36,12 +37,23 @@ char ** parse_input(char * input_string){
         command[index] = token;
         index++;
 
+        // if the upcoming index is index MAX_ARGS => already exceed
+        // cannot put that one to NULL
+        // must reallocate
+        if (index >= max_num_args){
+            max_num_args += MAX_ARGS;
+            command = realloc(command, max_num_args * sizeof(char *));
+            if (!command){
+                fprintf(stderr, "\n\n[ERROR] Reallocation failed!\n\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+
         // Repeat, start from NULL marker of prev token
         token = strtok(NULL, separator);
     }
 
-    // Last index should be null terminated
-    // TODO: What if more than MAX_ARGS???
+    // Last index should be a null-string/null-pointer as required in man
     command[index] = NULL;
     return command;
 
