@@ -79,17 +79,44 @@ int main(){
         input = readline();
         command = parse_input(input);
 
-        // Execute the command through child process
-        child_pid = fork();
-        if (child_pid == 0){
-            // Inside child body
-            execvp(command[0], command);
-            printf("This line will never printed if exec success!\n");
+        // Built in function handling here
+        // Check through and execute
+        // "cd"
+        if (strcmp(command[0],"cd") == 0){
+            if(chdir(command[1])<0){
+                fprintf(stderr, "\n\n[ERROR] Change Directory Failed!\n\n");
+                exit(EXIT_FAILURE);
+            }
+
+            // Skip the fork
+            continue;
         }
+
+        //"exit"
+        else if (strcmp(command[0], "exit") == 0){
+            exit(EXIT_SUCCESS);
+        }
+
         else{
-            // Wait for the child process to finish
-            waitpid(child_pid, &stat_loc, WUNTRACED);
+            // Execute the command through child process (Non-built-in case)
+            child_pid = fork();
+            if (child_pid < 0){
+                // Fork failed
+                fprintf(stderr, "\n\n[ERROR] Forking child process failed!\n\n");
+                exit(EXIT_FAILURE);
+            }
+            else if (child_pid == 0){
+                // Inside child body
+                // non-built-in
+                execvp(command[0], command);
+                printf("This line will never printed if exec success!\n");
+            }
+            else{
+                // Wait for the child process to finish
+                waitpid(child_pid, &stat_loc, WUNTRACED);
+            }
         }
+        
 
         // Clean up before next input
         free(input);
